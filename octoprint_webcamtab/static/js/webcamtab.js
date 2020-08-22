@@ -9,35 +9,36 @@ $(function() {
         var self = this;
 
         self.control = parameters[0];
+        self.consolidatetabs = parameters[1];
 
-        self.control.onTabChange = function (current, previous) {
+         self.control.onTabChange = function (current, previous) {
             // replaced #control with #tab_plugin_webcamtab
-            if (current == "#tab_plugin_webcamtab") {
+            if (current === "#tab_plugin_webcamtab" || (current === "#tab_plugin_consolidatedtabs" && self.consolidatetabs.hasWebcam())) {
                 self.control._enableWebcam();
-            } else if (previous == "#tab_plugin_webcamtab") {
+            } else if (previous === "#tab_plugin_webcamtab") {
                 self.control._disableWebcam();
             }
         };
 
         self.control._enableWebcam = function() {
             // replaced #control with #tab_plugin_webcamtab
-            if (OctoPrint.coreui.selectedTab != "#tab_plugin_webcamtab" || !OctoPrint.coreui.browserTabVisible) {
+            if ((OctoPrint.coreui.selectedTab !== "#tab_plugin_webcamtab" && OctoPrint.coreui.selectedTab !== "#tab_plugin_consolidatedtabs") || !OctoPrint.coreui.browserTabVisible) {
                 return;
             }
 
-            if (self.control.webcamDisableTimeout != undefined) {
+            if (self.control.webcamDisableTimeout !== undefined) {
                 clearTimeout(self.control.webcamDisableTimeout);
             }
             var webcamImage = $("#webcam_image");
             var currentSrc = webcamImage.attr("src");
 
             // safari bug doesn't release the mjpeg stream, so we just set it up the once
-            if (OctoPrint.coreui.browser.safari && currentSrc != undefined) {
+            if (OctoPrint.coreui.browser.safari && currentSrc !== undefined) {
                 return;
             }
 
             var newSrc = self.control.settings.webcam_streamUrl();
-            if (currentSrc != newSrc) {
+            if (currentSrc !== newSrc) {
                 if (newSrc.lastIndexOf("?") > -1) {
                     newSrc += "&";
                 } else {
@@ -66,7 +67,8 @@ $(function() {
 
     OCTOPRINT_VIEWMODELS.push({
         construct: WebcamTabViewModel,
-        dependencies: ["controlViewModel"],
+        dependencies: ["controlViewModel", "consolidatedtabsViewModel"],
+        optional: ["consolidatedtabsViewModel"],
         elements: ["#tab_plugin_webcamtab"]
     });
 });
