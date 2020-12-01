@@ -28,6 +28,18 @@ $(function() {
             if (self.control.webcamDisableTimeout != undefined) {
                 clearTimeout(self.control.webcamDisableTimeout);
             }
+
+            self.moveWebcams();
+            // Determine stream type and switch to corresponding webcam.
+            var streamType = determineWebcamStreamType(self.control.settings.webcam_streamUrl());
+            if (streamType == "mjpg") {
+                self.control._switchToMjpgWebcam();
+            } else if (streamType == "hls") {
+                self.control._switchToHlsWebcam();
+            } else {
+                throw "Unknown stream type " + streamType;
+            }
+
             var webcamImage = $("#webcam_image");
             var currentSrc = webcamImage.attr("src");
 
@@ -51,9 +63,9 @@ $(function() {
             }
         };
 
-        self.onAfterBinding = function() {
+        self.moveWebcams = function() {
             var tab = $("#tab_plugin_webcamtab");
-            var webcam = $("#webcam_container");
+            var webcam = $("#control > #webcam_container, #control > #webcam_hls_container");
             if (webcam) {
                 var hint = webcam.next();
                 tab.append(webcam.detach());
